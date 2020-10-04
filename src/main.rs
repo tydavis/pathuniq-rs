@@ -1,14 +1,14 @@
-use std::collections::HashSet;
 use std::env;
 
 fn main() {
     let key = "PATH";
     match env::var_os(key) {
         Some(path) => {
-            let mut paths = env::split_paths(&path).collect::<Vec<_>>();
-            let mut uniques = HashSet::new();
-            paths.retain(|e| uniques.insert(e.clone()));
-            let k = env::join_paths(paths).unwrap();
+            let mut paths = env::split_paths(&path).enumerate().collect::<Vec<_>>();
+            paths.sort_by(|(_, a), (_, b)| a.cmp(b));
+            paths.dedup_by(|(_, a), (_, b)| a.eq(&b));
+            paths.sort_by(|(a, _), (b, _)| a.cmp(b));
+            let k = env::join_paths(paths.iter().map(|(_, x)| x)).unwrap();
             let newpath = k.into_string().unwrap();
             println!("export PATH={}", newpath);
         }
