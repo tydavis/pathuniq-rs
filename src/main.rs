@@ -8,10 +8,13 @@ fn main() {
             paths.sort_by(|(_, a), (_, b)| a.cmp(b));
             paths.dedup_by(|(_, a), (_, b)| a.eq(&b));
             paths.sort_by(|(a, _), (b, _)| a.cmp(b));
-            let k = env::join_paths(paths.iter().map(|(_, x)| x)).unwrap();
-            let newpath = k.into_string().unwrap();
+            let k = env::join_paths(paths.iter().map(|(_, x)| x))
+                .unwrap_or_else(|error| panic!("error joining path: {:?}", error));
+            let newpath = k
+                .into_string()
+                .unwrap_or_else(|error| panic!("could not translate path into str: {:?}", error));
             println!("export PATH={}", newpath);
         }
-        None => println!("{} is not defined in the environment.", key),
+        None => println!("variable {} is not defined in the environment.", key),
     }
 }
